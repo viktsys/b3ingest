@@ -22,5 +22,5 @@ func Execute() {
 }
 
 func init() {
-	// TODO: Add subcommands and flags here
+	rootCMD.AddCommand(serverCMD)
 }
