@@ -23,4 +23,5 @@ func Execute() {
 
 func init() {
 	rootCMD.AddCommand(serverCMD)
+	rootCMD.AddCommand(ingestCMD)
 }
