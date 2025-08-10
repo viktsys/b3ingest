@@ -25,7 +25,7 @@ const (
 	// Optimized default values for high-performance processing
 	DefaultBatchSize   = 10000 // Increased batch size
 	DefaultWorkerCount = 64    // Reduced to prevent connection pool exhaustion
-	DefaultFileWorkers = 16    // Reduced for better resource management
+	DefaultFileWorkers = 2     // Reduced for better resource management
 	DefaultBufferSize  = 512   // Increased buffer
 
 	// SQL statement constants
@@ -621,7 +621,6 @@ func (p *Processor) AggregateDaily() error {
 			volume_total = EXCLUDED.volume_total,
 			preco_maximo = EXCLUDED.preco_maximo,
 			created_at = EXCLUDED.created_at
-		ORDER BY data_negocio, codigo_instrumento
 	`
 
 	// Execute aggregation with timeout context and using raw SQL for better performance
