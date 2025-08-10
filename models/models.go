@@ -18,8 +18,8 @@ type Trade struct {
 // DailyAggregate armazena dados agregados por dia e ticker
 type DailyAggregate struct {
 	ID                uint      `gorm:"primaryKey" json:"id"`
-	DataNegocio       time.Time `gorm:"index:idx_daily_ticker" json:"data_negocio"`
-	CodigoInstrumento string    `gorm:"index:idx_daily_ticker;size:20" json:"codigo_instrumento"`
+	DataNegocio       time.Time `gorm:"index:idx_daily_ticker;uniqueIndex:uidx_data_ticker" json:"data_negocio"`
+	CodigoInstrumento string    `gorm:"index:idx_daily_ticker;size:20;uniqueIndex:uidx_data_ticker" json:"codigo_instrumento"`
 	VolumeTotal       uint64    `json:"volume_total"`
 	PrecoMaximo       float64   `json:"preco_maximo"`
 	CreatedAt         time.Time `json:"created_at"`

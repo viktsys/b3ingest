@@ -38,9 +38,11 @@ func InitDB() error {
 		return fmt.Errorf("failed to get database instance: %w", err)
 	}
 
-	sqlDB.SetMaxOpenConns(50)
-	sqlDB.SetMaxIdleConns(50)
-	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+	// Configure connection pool for high-performance bulk inserts
+	sqlDB.SetMaxOpenConns(50)                  // Increased for parallel processing
+	sqlDB.SetMaxIdleConns(50)                  // Match max open conns
+	sqlDB.SetConnMaxLifetime(10 * time.Minute) // Increased lifetime
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Added idle timeout
 
 	// Auto migrate the schema
 	if err := DB.AutoMigrate(&models.Trade{}, &models.DailyAggregate{}); err != nil {
