@@ -182,6 +182,28 @@ sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Timeout de idle
 | Uso de Memória | Otimizado | ~100-150MB durante ingestão |
 | Concurrent Workers | Configurável | 64 workers por padrão |
 
+### Branch "indexes" - Otimizações para Leitura Ultra-Rápida
+
+O repositório possui uma branch experimental chamada `indexes` que implementa otimizações agressivas de índices para consultas ultra-rápidas (< 100ms). Esta branch demonstra práticas avançadas de otimização usando índices especializados.
+
+#### Características da Branch "indexes"
+- **Consultas Ultra-Rápidas**: Response time consistente abaixo de 100ms
+- **Índices Especializados**: Covering indexes e índices parciais otimizados
+- **Trade-off de Performance**: O tempo de ingestão dobra (10min → 20min)
+- **Demonstração Educacional**: Exemplifica estratégias de otimização com índices
+
+#### Por que não está na Branch Principal?
+Embora as consultas sejam significativamente mais rápidas, o impacto na ingestão (100% mais lenta) não cumpre os requisitos da especificação do teste técnico. 
+A branch serve como:
+- Demonstração de técnicas avançadas de indexação
+- Benchmark comparativo de estratégias de otimização  
+- Referência para casos onde consultas são mais críticas que ingestão
+
+```bash
+# Para explorar as otimizações de índices
+git checkout indexes
+```
+
 ## Requisitos
 
 - Go 1.22+
@@ -239,92 +261,7 @@ make run-ingest
 curl "http://localhost:8080/api/trades/stats?ticker=PETR4"
 ```
 
-## Instalação e Configuração
-
-### 1. Setup Completo (Recomendado)
-
-Para configurar todo o ambiente de uma vez:
-
-```bash
-git clone https://github.com/viktsys/b3ingest
-cd b3ingest
-
-# Setup completo: constrói containers, inicia serviços e compila binário
-make setup
-```
-
-Este comando executa automaticamente:
-- `docker compose build` - Constrói os containers
-- `docker compose up -d` - Inicia os serviços em background
-- `go build -o bin/b3ingest` - Compila o binário da aplicação
-
-### 2. Preparar os Dados
-
-Baixe os arquivos CSV e TXT de negociações da B3 e coloque no diretório `data/`:
-
-```bash
-mkdir -p data
-# Coloque seus arquivos .csv ou .txt no diretório data/
-```
-
-**Estrutura esperada do CSV:**
-- Separador: `;` (ponto e vírgula)
-- Colunas: DataNegocio, CodigoInstrumento, PrecoNegocio, QuantidadeNegociada, HoraFechamento
-- Formato da data: YYYY-MM-DD
-- Formato do preço: decimal com vírgula (será convertido para ponto)
-
-### 3. Executar a Ingestão de Dados
-
-```bash
-# Usando o Makefile (recomendado)
-make run-ingest
-
-# Ou diretamente (alternativo)
-./bin/b3ingest ingest data/
-```
-
-### 4. Comandos Úteis do Makefile
-
-```bash
-# Visualizar todos os comandos disponíveis
-make help
-
-# Construir apenas o binário
-make build
-
-# Iniciar apenas os serviços Docker
-make docker-up
-
-# Parar os serviços
-make docker-down
-
-# Ver logs dos containers
-make docker-logs
-
-# Ver status dos containers
-make status
-
-# Executar testes
-make test
-
-# Limpar tudo (containers, volumes, binários)
-make clean
-
-# Reset completo do banco de dados
-make db-reset
-```
-
-### 5. Iniciar o Servidor da API
-
-```bash
-# Usando o Makefile (recomendado)
-make run-server
-
-# Ou diretamente (alternativo)  
-./bin/b3ingest server
-```
-
-### 6. Consultar a API
+### Consultar a API
 
 #### Parâmetros
 
