@@ -52,3 +52,7 @@ data/*.csv
 # csv files
 *.csv
 !sample.csv
+
+# zip and txt files
+*.zip
+*.txt
