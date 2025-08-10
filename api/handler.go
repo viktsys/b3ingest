@@ -47,28 +47,31 @@ func GetTradeStats(c *gin.Context) {
 func calculateStats(ticker string, startDate time.Time) (*models.TradeStats, error) {
 	db := database.DB
 
-	var maxPrice float64
-	err := db.Model(&models.Trade{}).
-		Select("COALESCE(MAX(preco_negocio), 0)").
-		Where("codigo_instrumento = ? AND data_negocio >= ?", ticker, startDate).
-		Scan(&maxPrice).Error
-	if err != nil {
-		return nil, err
+	// Estrutura para capturar o resultado da query combinada
+	type StatsResult struct {
+		MaxPrice       float64
+		MaxDailyVolume uint64
 	}
 
-	var maxDailyVolume uint64
-	err = db.Model(&models.DailyAggregate{}).
-		Select("COALESCE(MAX(volume_total), 0)").
-		Where("codigo_instrumento = ? AND data_negocio >= ?", ticker, startDate).
-		Scan(&maxDailyVolume).Error
+	var result StatsResult
+
+	// Query combinada usando subqueries para otimizar performance
+	err := db.Raw(`
+		SELECT 
+			COALESCE((SELECT MAX(preco_negocio) FROM trades 
+				WHERE codigo_instrumento = ? AND data_negocio >= ?), 0) as max_price,
+			COALESCE((SELECT MAX(volume_total) FROM daily_aggregates 
+				WHERE codigo_instrumento = ? AND data_negocio >= ?), 0) as max_daily_volume
+	`, ticker, startDate, ticker, startDate).Scan(&result).Error
+
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.TradeStats{
 		Ticker:         ticker,
-		MaxRangeValue:  maxPrice,
-		MaxDailyVolume: maxDailyVolume,
+		MaxRangeValue:  result.MaxPrice,
+		MaxDailyVolume: result.MaxDailyVolume,
 	}, nil
 }
 

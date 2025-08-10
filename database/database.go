@@ -38,15 +38,20 @@ func InitDB() error {
 		return fmt.Errorf("failed to get database instance: %w", err)
 	}
 
-	// Configure connection pool for high-performance bulk inserts
-	sqlDB.SetMaxOpenConns(50)                  // Increased for parallel processing
-	sqlDB.SetMaxIdleConns(50)                  // Match max open conns
-	sqlDB.SetConnMaxLifetime(10 * time.Minute) // Increased lifetime
-	sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Added idle timeout
+	// Configure connection pool for optimal read performance
+	sqlDB.SetMaxOpenConns(25)                  // Reduzido para consultas de leitura
+	sqlDB.SetMaxIdleConns(25)                  // Match max open conns
+	sqlDB.SetConnMaxLifetime(30 * time.Minute) // Increased lifetime for stability
+	sqlDB.SetConnMaxIdleTime(10 * time.Minute) // Longer idle timeout for read queries
 
 	// Auto migrate the schema
 	if err := DB.AutoMigrate(&models.Trade{}, &models.DailyAggregate{}); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
+	}
+
+	// Apply database optimizations
+	if err := OptimizeIndexes(DB); err != nil {
+		log.Printf("Warning: Failed to optimize indexes: %v", err)
 	}
 
 	log.Println("Database connected and migrated successfully")
