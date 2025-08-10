@@ -199,27 +199,66 @@ sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Timeout de idle
 ├── data/                # Diretório para arquivos CSV
 ├── docker-compose.yml   # Orquestração de serviços
 ├── Dockerfile           # Container da aplicação
+├── Makefile             # Automação de tarefas de desenvolvimento
 └── README.md            # Documentação
+```
+
+## Makefile - Automação de Tarefas
+
+O projeto inclui um Makefile completo para automatizar todas as tarefas de desenvolvimento e deploy:
+
+### Comandos Principais
+
+- `make setup` - **Setup completo**: constrói containers, inicia serviços e compila binário
+- `make build` - Compila apenas o binário Go
+- `make run-ingest` - Executa a ingestão de dados
+- `make run-server` - Inicia o servidor da API
+- `make test` - Executa os testes
+- `make clean` - Limpa todos os artefatos e containers
+
+### Comandos Docker
+
+- `make docker-build` - Constrói os containers Docker
+- `make docker-up` - Inicia os serviços
+- `make docker-down` - Para os serviços
+- `make docker-logs` - Exibe logs dos containers
+- `make status` - Mostra status dos containers
+
+### Exemplo de Uso Completo
+
+```bash
+# 1. Setup inicial
+make setup
+
+# 2. Colocar arquivos CSV em data/
+
+# 3. Executar ingestão
+make run-ingest
+
+# 4. Testar API
+curl "http://localhost:8080/api/trades/stats?ticker=PETR4"
 ```
 
 ## Instalação e Configuração
 
-### 1. Clonar e Preparar o Ambiente (Instalação de dependências)
+### 1. Setup Completo (Recomendado)
+
+Para configurar todo o ambiente de uma vez:
 
 ```bash
 git clone https://github.com/viktsys/b3ingest
-
 cd b3ingest
 
-go mod download
+# Setup completo: constrói containers, inicia serviços e compila binário
+make setup
 ```
 
-### 2. Subir o ambiente usando Docker Compose
-```
-docker compose up -d
-```
+Este comando executa automaticamente:
+- `docker compose build` - Constrói os containers
+- `docker compose up -d` - Inicia os serviços em background
+- `go build -o bin/b3ingest` - Compila o binário da aplicação
 
-### 3. Preparar os Dados
+### 2. Preparar os Dados
 
 Baixe os arquivos CSV e TXT de negociações da B3 e coloque no diretório `data/`:
 
@@ -234,16 +273,55 @@ mkdir -p data
 - Formato da data: YYYY-MM-DD
 - Formato do preço: decimal com vírgula (será convertido para ponto)
 
-### 4. Compilar a Aplicação
+### 3. Executar a Ingestão de Dados
 
 ```bash
-go build -o bin/b3ingest .
+# Usando o Makefile (recomendado)
+make run-ingest
+
+# Ou diretamente (alternativo)
+./bin/b3ingest ingest data/
 ```
 
-### 5. Executar a aplicação no modo ingester
+### 4. Comandos Úteis do Makefile
 
 ```bash
-./bin/b3ingest ingest --data-dir data/
+# Visualizar todos os comandos disponíveis
+make help
+
+# Construir apenas o binário
+make build
+
+# Iniciar apenas os serviços Docker
+make docker-up
+
+# Parar os serviços
+make docker-down
+
+# Ver logs dos containers
+make docker-logs
+
+# Ver status dos containers
+make status
+
+# Executar testes
+make test
+
+# Limpar tudo (containers, volumes, binários)
+make clean
+
+# Reset completo do banco de dados
+make db-reset
+```
+
+### 5. Iniciar o Servidor da API
+
+```bash
+# Usando o Makefile (recomendado)
+make run-server
+
+# Ou diretamente (alternativo)  
+./bin/b3ingest server
 ```
 
 ### 6. Consultar a API
