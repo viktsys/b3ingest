@@ -204,11 +204,14 @@ sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Timeout de idle
 
 ## Instalação e Configuração
 
-### 1. Clonar e Preparar o Ambiente
+### 1. Clonar e Preparar o Ambiente (Instalação de dependências)
 
 ```bash
 git clone https://github.com/viktsys/b3ingest
+
 cd b3ingest
+
+go mod download
 ```
 
 ### 2. Subir o ambiente usando Docker Compose
@@ -218,11 +221,11 @@ docker compose up -d
 
 ### 3. Preparar os Dados
 
-Baixe os arquivos CSV de negociações da B3 e coloque no diretório `data/`:
+Baixe os arquivos CSV e TXT de negociações da B3 e coloque no diretório `data/`:
 
 ```bash
 mkdir -p data
-# Coloque seus arquivos .csv no diretório data/
+# Coloque seus arquivos .csv ou .txt no diretório data/
 ```
 
 **Estrutura esperada do CSV:**
