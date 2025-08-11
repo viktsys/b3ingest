@@ -182,6 +182,28 @@ sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Timeout de idle
 | Uso de Memória | Otimizado | ~100-150MB durante ingestão |
 | Concurrent Workers | Configurável | 64 workers por padrão |
 
+### Branch "indexes" - Otimizações para Leitura Ultra-Rápida
+
+O repositório possui uma branch experimental chamada `indexes` que implementa otimizações agressivas de índices para consultas ultra-rápidas (< 100ms). Esta branch demonstra práticas avançadas de otimização usando índices especializados.
+
+#### Características da Branch "indexes"
+- **Consultas Ultra-Rápidas**: Response time consistente abaixo de 100ms
+- **Índices Especializados**: Covering indexes e índices parciais otimizados
+- **Trade-off de Performance**: O tempo de ingestão dobra (10min → 20min)
+- **Demonstração Educacional**: Exemplifica estratégias de otimização com índices
+
+#### Por que não está na Branch Principal?
+Embora as consultas sejam significativamente mais rápidas, o impacto na ingestão (100% mais lenta) não cumpre os requisitos da especificação do teste técnico. 
+A branch serve como:
+- Demonstração de técnicas avançadas de indexação
+- Benchmark comparativo de estratégias de otimização  
+- Referência para casos onde consultas são mais críticas que ingestão
+
+```bash
+# Para explorar as otimizações de índices
+git checkout indexes
+```
+
 ## Requisitos
 
 - Go 1.22+
@@ -199,54 +221,47 @@ sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Timeout de idle
 ├── data/                # Diretório para arquivos CSV
 ├── docker-compose.yml   # Orquestração de serviços
 ├── Dockerfile           # Container da aplicação
+├── Makefile             # Automação de tarefas de desenvolvimento
 └── README.md            # Documentação
 ```
 
-## Instalação e Configuração
+## Makefile - Automação de Tarefas
 
-### 1. Clonar e Preparar o Ambiente (Instalação de dependências)
+O projeto inclui um Makefile completo para automatizar todas as tarefas de desenvolvimento e deploy:
 
-```bash
-git clone https://github.com/viktsys/b3ingest
+### Comandos Principais
 
-cd b3ingest
+- `make setup` - **Setup completo**: constrói containers, inicia serviços e compila binário
+- `make build` - Compila apenas o binário Go
+- `make run-ingest` - Executa a ingestão de dados
+- `make run-server` - Inicia o servidor da API
+- `make test` - Executa os testes
+- `make clean` - Limpa todos os artefatos e containers
 
-go mod download
-```
+### Comandos Docker
 
-### 2. Subir o ambiente usando Docker Compose
-```
-docker compose up -d
-```
+- `make docker-build` - Constrói os containers Docker
+- `make docker-up` - Inicia os serviços
+- `make docker-down` - Para os serviços
+- `make docker-logs` - Exibe logs dos containers
+- `make status` - Mostra status dos containers
 
-### 3. Preparar os Dados
-
-Baixe os arquivos CSV e TXT de negociações da B3 e coloque no diretório `data/`:
-
-```bash
-mkdir -p data
-# Coloque seus arquivos .csv ou .txt no diretório data/
-```
-
-**Estrutura esperada do CSV:**
-- Separador: `;` (ponto e vírgula)
-- Colunas: DataNegocio, CodigoInstrumento, PrecoNegocio, QuantidadeNegociada, HoraFechamento
-- Formato da data: YYYY-MM-DD
-- Formato do preço: decimal com vírgula (será convertido para ponto)
-
-### 4. Compilar a Aplicação
+### Exemplo de Uso Completo
 
 ```bash
-go build -o bin/b3ingest .
+# 1. Setup inicial
+make setup
+
+# 2. Colocar arquivos CSV em data/
+
+# 3. Executar ingestão
+make run-ingest
+
+# 4. Testar API
+curl "http://localhost:8080/api/trades/stats?ticker=PETR4"
 ```
 
-### 5. Executar a aplicação no modo ingester
-
-```bash
-./bin/b3ingest ingest --data-dir data/
-```
-
-### 6. Consultar a API
+### Consultar a API
 
 #### Parâmetros
 
