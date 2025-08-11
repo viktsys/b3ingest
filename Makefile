@@ -36,7 +36,7 @@ setup: docker-build docker-up build
 	@echo "   3. Test the API: curl \"http://localhost:8080/api/trades/stats?ticker=PETR4\""
 
 # Build Go binary
-build:
+build: deps
 	@echo "🔨 Building Go binary..."
 	@mkdir -p bin
 	go build -o bin/b3ingest .
